@@ -6,7 +6,7 @@
 // 为了更好的图片体验加载的是full规格的图片,可能加载的有点慢,请见谅
 
 let appID = '17805ef4205f7051084afdf56296a3811b0d98deb7cf68688554bc54562cf222' 
-let page=1,perPage=12,photos=[],currIndex=0,res=''; 
+let page=1,perPage=12,photos=[],currIndex=0,res='',searchTxt=''; 
 const sizes = [$size(550, 850),$size(1000, 665), $size(1024, 689),$size(640, 427),]
 const CN_MENU =['最新','精选','搜索']
 let h = 250
@@ -15,6 +15,7 @@ $ui.render({
     title: "unsplash",
     navButtons:[{
       title:"支持",
+      icon: "103",
       handler:()=>{
         $ui.menu({
           items:["越花越有礼❤","请我喝杯咖啡❤"],
@@ -130,6 +131,7 @@ $ui.render({
                         url: object.image.src, 
                         handler: function(resp) { 
                           $share.universal(resp.data) 
+                          $app.tips("下载完成")
                         } 
                       }) 
                     } 
@@ -211,8 +213,8 @@ function searchPhotoView(){
         returned(sender) {
           sender.blur()
           if (sender.text) {
+            searchTxt = sender.text
             $device.taptic(0);
-            console.log(sender.text)
             $ui.toast("正在为你查找中...")
             fetchData(page,perPage,'https://api.unsplash.com/search/collections?query='+sender.text)
           } else {
@@ -221,13 +223,30 @@ function searchPhotoView(){
         }
       }
     }, 
+    {
+      type: "label",
+      props: {
+        id: "photosCount",
+        bgcolor: $color("#fff"),
+        font: $font("bold", 30),
+        textColor: $color("#008080"),
+        autoFontSize: true
+      },
+      layout: function(make, view) {
+        make.top.equalTo($("searchInput").bottom).offset(1)
+        make.height.equalTo(35)
+        make.width.equalTo(view.super);
+      }
+    },
     { 
       type: "matrix", 
       props: { 
         id:"searchListView",
         columns: 1, 
         spacing: 10, 
-        itemHeight: 150,
+        selectable:true, 
+        waterfall:true, 
+        square:false,
         bgcolor: $color("#eeeeee"),
         footer: {
           type: "label",
@@ -245,19 +264,23 @@ function searchPhotoView(){
             type: "image", 
             props: {  
               id:"searchRes",
-              radius: 3
+              smoothRadius:10,
             }, 
             layout: $layout.fill
           }
         ] 
       }, 
       layout: (make,view)=> { 
-        make.top.equalTo($("searchInput").bottom)
+        make.top.equalTo($("photosCount").bottom)
         make.bottom.inset(0)
         make.left.right.inset(0)
       }, 
       events: { 
+        itemSize: (sender, indexPath) => {
+              return sizes[indexPath.item % 4]
+        },
         didSelect: function(sender, indexPath, object) { 
+          console.log(object)
           $ui.push({ 
             props: { 
               title: "image" 
@@ -265,15 +288,16 @@ function searchPhotoView(){
             views: [{ 
               type: "image", 
               props: { 
-                src: object.image.src 
+                src: object.searchRes.src 
               }, 
               layout: $layout.fill, 
               events: { 
                 tapped: (sender)=> { 
                   $http.download({ 
-                    url: object.image.src, 
+                    url: object.searchRes.src, 
                     handler: function(resp) { 
                       $share.universal(resp.data) 
+                      $app.tips("下载完成")
                     } 
                   }) 
                 } 
@@ -285,7 +309,7 @@ function searchPhotoView(){
           $ui.toast("请求数据中...") 
           $device.taptic(1) 
           page++; 
-          fetchData(page,perPage,'https://api.unsplash.com/search/collections?query='+sender.text)
+          fetchData(page,perPage,'https://api.unsplash.com/search/collections?query='+searchTxt)
           $delay(1.5, function() { 
             sender.endFetchingMore() 
           }) 
@@ -294,26 +318,23 @@ function searchPhotoView(){
     }
     ]
   })
-  
+   fetchData(page,perPage,'https://api.unsplash.com/search/collections?query=city')
+   $("photosCount").text="本周热搜";
 }
 
 function fetchData(page,perPage,reqUrl){ 
   if(currIndex ==2){
      var url =reqUrl+"&client_id="+appID+"&page="+page
-   }else{
+  }else{
      var url =reqUrl+"?client_id="+appID+"&page="+page+"&per_page="+perPage 
-   }
- 
+  }
   $ui.loading(true) 
   $http.get({ 
     url:url, 
     handler: (resp)=> { 
-      if(currIndex ==2){
-        photos = photos.concat(resp.data)
-      }else{
-        photos = photos.concat(resp.data) 
-      }
       $ui.loading(false) 
+      photos = photos.concat(resp.data)
+      console.log(photos.length) 
       render(photos) 
     } 
   }) 
@@ -322,14 +343,14 @@ function fetchData(page,perPage,reqUrl){
  
 function render(data) { 
   if(data ==""){
-  	console.log("网络挂掉了")
+  	console.log("暂未匹配到结果")
+    $ui.alert("暂未匹配到结果")
     return false
   }else{
     if(currIndex ==2){
-        $("searchListView").data = data.map((item)=> { 
-          item.results.map((i)=>{
-            console.log(i.cover_photo.urls.regular)
-            return { image: { src: i.cover_photo.urls.regular } } 
+        data.map((item)=> { 
+           $("searchListView").data =item.results.map((i)=>{
+            return { searchRes: { src: i.cover_photo.urls.regular } } 
           })
         }) 
     }else{
@@ -355,9 +376,18 @@ function render(data) {
   
 } 
  
+function fetchNetworkType(){
+  let networkType = $device.networkType
+  if(networkType ==0){
+    $ui.alert("您当前无网络,请检查后再试")
+  }else if(networkType ==1){
+    $ui.toast("您正在使用wifi网络")
+  }else{
+    $ui.toast("您正在使用蜂窝数据网络")
+  }
+}
 
-
- 
+fetchNetworkType()
 fetchData(page,perPage,"https://api.unsplash.com/photos") 
 
 
