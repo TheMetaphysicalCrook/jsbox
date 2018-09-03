@@ -1,0 +1,8 @@
+{
+	"app": "1.1",
+	"scripts": [
+		"UIViews.js",
+		"loading.html",
+		"rainbowText.html"
+	]
+}

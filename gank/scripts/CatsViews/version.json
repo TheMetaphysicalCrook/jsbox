@@ -1,0 +1,14 @@
+{
+	"app": "1.2.8.1",
+	"scripts": [
+		"UIViews.js",
+		"loading.html",
+		"socketLogger.js",
+		"rainbowText.html",
+		"video/index.html",
+		"video/DPlayer.min.js",
+		"video/DPlayer.min.css",
+		"video/DPlayer.min.js.map",
+		"video/DPlayer.min.css.map"
+	]
+}

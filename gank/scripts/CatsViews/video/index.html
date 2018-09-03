@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="stylesheet" href="DPlayer.min.css">
+    <script src="DPlayer.min.js"></script>
+</head>
+
+<body>
+    <div id="dplayer"></div>
+</body>
+<script>
+    const dp = new DPlayer({
+        video: {
+            url: '*.mp4',
+            pic: '*.png',
+            type: 'auto',
+            autoplay: true,
+            thumbnails: '*.jpg'
+        },
+        volume: 1,
+        preload: 'auto',
+        container: document.getElementById('dplayer'),
+    });
+    dp.fullScreen.request('web');
+</script>
+
+</html>

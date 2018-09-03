@@ -1,0 +1,11 @@
+{
+	"app": "1.1.0（版本号）",
+	"scripts": [ 
+		"about.js（写入更新脚本的文件，scripts文件夹有啥就写啥）",
+		"index.js"	
+		"search.js"
+		"featured.js"
+		"info.js"
+		"updata.js"
+	] 
+}

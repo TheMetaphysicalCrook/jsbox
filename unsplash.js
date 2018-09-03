@@ -9,6 +9,8 @@ let appID = '17805ef4205f7051084afdf56296a3811b0d98deb7cf68688554bc54562cf222'
 let page=1,perPage=12,photos=[],currIndex=0,res='',searchTxt=''; 
 const sizes = [$size(550, 850),$size(1000, 665), $size(1024, 689),$size(640, 427),]
 const CN_MENU =['最新','精选','搜索']
+const dw = $device.info.screen.width
+const dh = $device.info.screen.height
 let h = 250
 $ui.render({ 
   props: { 
@@ -122,9 +124,12 @@ $ui.render({
                 views: [{ 
                   type: "image", 
                   props: { 
-                    src: object.image.src 
+                    src: object.image.src,
+                    scale:0.8
                   }, 
-                  layout: $layout.fill, 
+                  layout: (make,view)=>{
+                    make.width.equalTo
+                  },
                   events: { 
                     tapped: function(sender) { 
                       $http.download({ 
