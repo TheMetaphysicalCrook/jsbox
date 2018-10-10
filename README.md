@@ -17,3 +17,7 @@ This is my own library for developing jsbox plugins.
 # gank
 
 > jsbox 版的 gank.io
+
+# jiejing
+
+> jsbox版的[myshortcuts.app](https://myshortcuts.app/)
